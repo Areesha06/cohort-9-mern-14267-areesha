@@ -6,9 +6,9 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-  "start": "node server.js",
-  "test": "mocha",
-  "coverage": "c8 mocha"
+    "start": "node server.js",
+    "test": "mocha",
+    "coverage": "c8 mocha"
   },
   "keywords": [],
   "author": "",
