@@ -1,4 +1,4 @@
-import { createUser } from '../services/authService.js';
+import { createUser, loginUser as loginUserService } from '../services/authService.js';
 import logger from '../utils/logger.js';
 
 export const registerUser = async (req, res) => {
@@ -20,14 +20,46 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error({ errorCode: error.code, statusCode: error.statusCode },'Registration failed');
+    logger.error({ errorCode: error.code, statusCode: error.statusCode }, 'Registration failed');
 
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({
       success: false,
-      message: 
+      message:
         statusCode >= 500
           ? 'Something went wrong during registration'
+          : error.message,
+    });
+  }
+};
+
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const { user, token } = await loginUserService({ email, password });
+
+    logger.info(`User logged in: ${user.email}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      token,
+      data: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    logger.warn({ errorCode: error.code, statusCode: error.statusCode }, 'Login failed');
+
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      success: false,
+      message:
+        statusCode >= 500
+          ? 'Something went wrong during login'
           : error.message,
     });
   }
