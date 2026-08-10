@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import logger from '../utils/logger.js';
 
 const userSchema = new mongoose.Schema(
   {
@@ -22,6 +23,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Password is required'],
       minlength: [6, 'Password must be at least 6 characters'],
+      validate: {
+        validator: (password) => Buffer.byteLength(password, 'utf8') <= 72,
+        message: 'Password must not exceed 72 bytes',
+      },
       select: false, // never returned in queries unless explicitly requested
     },
   },
@@ -30,13 +35,20 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Hash the password automatically before saving, but only if it changed.
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
 
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  // next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  } catch (error) {
+    logger.error(
+      { errorCode: error.code },
+      'Password hashing failed'
+    );
+
+    throw new Error('Unable to process password');
+  }
 });
 
 // Instance method we'll use later during login to check a submitted password.

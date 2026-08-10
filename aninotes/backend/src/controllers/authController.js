@@ -7,7 +7,7 @@ export const registerUser = async (req, res) => {
 
     const user = await createUser({ username, email, password });
 
-    logger.info(`New user registered: ${user.email}`);
+    logger.info({ userId: user._id }, 'New user registered');
 
     res.status(201).json({
       success: true,
@@ -20,12 +20,15 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error(`Registration failed: ${error.message}`);
+    logger.error({ errorCode: error.code, statusCode: error.statusCode },'Registration failed');
 
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({
       success: false,
-      message: error.message || 'Something went wrong during registration',
+      message: 
+        statusCode >= 500
+          ? 'Something went wrong during registration'
+          : error.message,
     });
   }
 };

@@ -13,6 +13,13 @@ export const registerValidator = [
     .normalizeEmail(),
 
   body('password')
-    .notEmpty().withMessage('Password is required')
-    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  .notEmpty().withMessage('Password is required')
+  .isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+  .custom((password) => {
+    if (Buffer.byteLength(password, 'utf8') > 72) {
+      throw new Error('Password must not exceed 72 bytes');
+    }
+
+    return true;
+  }),
 ];
