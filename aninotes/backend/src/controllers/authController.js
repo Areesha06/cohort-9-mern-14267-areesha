@@ -39,7 +39,7 @@ export const loginUser = async (req, res) => {
 
     const { user, token } = await loginUserService({ email, password });
 
-    logger.info(`User logged in: ${user.email}`);
+    logger.info({ userId: user._id }, 'User logged in');
 
     res.status(200).json({
       success: true,
