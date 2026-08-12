@@ -64,3 +64,16 @@ export const loginUser = async (req, res) => {
     });
   }
 };
+
+export const getMe = (req, res) => {
+  // req.user was attached by the `protect` middleware
+  res.status(200).json({
+    success: true,
+    message: 'Authenticated user retrieved successfully',
+    data: {
+      id: req.user._id,
+      username: req.user.username,
+      email: req.user.email,
+    },
+  });
+};
