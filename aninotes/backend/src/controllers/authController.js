@@ -39,7 +39,7 @@ export const loginUser = async (req, res) => {
 
     const { user, token } = await loginUserService({ email, password });
 
-    logger.info({ userId: user._id }, 'User logged in');
+    logger.info({ userId: user._id }, 'User logged in.');
 
     res.status(200).json({
       success: true,
@@ -66,7 +66,6 @@ export const loginUser = async (req, res) => {
 };
 
 export const getMe = (req, res) => {
-  // req.user was attached by the `protect` middleware
   res.status(200).json({
     success: true,
     message: 'Authenticated user retrieved successfully',

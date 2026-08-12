@@ -6,7 +6,6 @@ const protect = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    // 1. Header must exist and start with "Bearer "
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       logger.warn('Auth failed: missing or malformed Authorization header');
       return res.status(401).json({
@@ -15,7 +14,6 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // 2. Extract the token part after "Bearer "
     const token = authHeader.split(' ')[1];
 
     if (!token) {
@@ -26,7 +24,6 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // 3. Verify the token — throws if invalid or expired
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -38,7 +35,6 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // 4. Look up the user, excluding the password hash
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user) {
@@ -49,7 +45,6 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // 5. Attach the user to the request for downstream handlers to use
     req.user = user;
 
     next();
