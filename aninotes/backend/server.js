@@ -15,7 +15,6 @@ if (!Number.isInteger(PORT) || PORT < 0 || PORT > 65535) {
   throw new Error('PORT must be an integer between 0 and 65535');
 }
 
-// Validate JWT configuration before starting the server
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
 
