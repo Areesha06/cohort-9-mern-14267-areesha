@@ -27,11 +27,11 @@ const userSchema = new mongoose.Schema(
         validator: (password) => Buffer.byteLength(password, 'utf8') <= 72,
         message: 'Password must not exceed 72 bytes',
       },
-      select: false, // never returned in queries unless explicitly requested
+      select: false, 
     },
   },
   {
-    timestamps: true, // automatically adds createdAt and updatedAt fields
+    timestamps: true, 
   }
 );
 
@@ -51,7 +51,6 @@ userSchema.pre('save', async function () {
   }
 });
 
-// Instance method we'll use later during login to check a submitted password.
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };

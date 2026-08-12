@@ -39,7 +39,7 @@ export const loginUser = async (req, res) => {
 
     const { user, token } = await loginUserService({ email, password });
 
-    logger.info({ userId: user._id }, 'User logged in');
+    logger.info({ userId: user._id }, 'User logged in.');
 
     res.status(200).json({
       success: true,
@@ -63,4 +63,16 @@ export const loginUser = async (req, res) => {
           : error.message,
     });
   }
+};
+
+export const getMe = (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Authenticated user retrieved successfully',
+    data: {
+      id: req.user._id,
+      username: req.user.username,
+      email: req.user.email,
+    },
+  });
 };
