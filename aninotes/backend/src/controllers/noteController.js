@@ -105,7 +105,7 @@ export const deleteNote = async (req, res) => {
   try {
     await noteService.deleteNote(req.params.id, req.user._id);
 
-    logger.info({ noteId: note._id, userId: req.user._id }, 'Note deleted');
+    logger.info({ noteId: req.params.id, userId: req.user._id }, 'Note deleted');
 
     res.status(200).json({
       success: true,
