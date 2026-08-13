@@ -6,7 +6,7 @@ export const createNote = async (req, res) => {
     const { title, content } = req.body;
     const note = await noteService.createNote({ title, content, userId: req.user._id });
 
-    logger.info(`Note created (id: ${note._id}) by user: ${req.user.email}`);
+    logger.info({ noteId: note._id, userId: req.user._id }, 'Note created');
 
     res.status(201).json({
       success: true,
@@ -16,11 +16,15 @@ export const createNote = async (req, res) => {
   } catch (error) {
     logger.error(`Create note failed: ${error.message}`);
     const statusCode = error.statusCode || 500;
+    const message =
+        statusCode === 500
+        ? 'Something went wrong while creating the note'
+        : error.message;
     res.status(statusCode).json({
-      success: false,
-      message: error.message || 'Something went wrong while creating the note',
+        success: false,
+        message,
     });
-  }
+    }
 };
 
 export const getNotes = async (req, res) => {
@@ -33,12 +37,17 @@ export const getNotes = async (req, res) => {
       data: notes,
     });
   } catch (error) {
-    logger.error(`Fetch notes failed: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'Something went wrong while fetching notes',
+    logger.error(`Get note failed: ${error.message}`);
+    const statusCode = error.statusCode || 500;
+    const message =
+        statusCode === 500
+        ? 'Something went wrong while fetching the note'
+        : error.message;
+    res.status(statusCode).json({
+        success: false,
+        message,
     });
-  }
+    }
 };
 
 export const getNote = async (req, res) => {
@@ -49,21 +58,27 @@ export const getNote = async (req, res) => {
       success: true,
       data: note,
     });
-  } catch (error) {
-    logger.warn(`Fetch note failed (id: ${req.params.id}): ${error.message}`);
+    } catch (error) {
+    logger.error(`Get note failed: ${error.message}`);
+
     const statusCode = error.statusCode || 500;
+    const message =
+        statusCode === 500
+        ? 'Something went wrong while fetching the note'
+        : error.message;
+
     res.status(statusCode).json({
-      success: false,
-      message: error.message || 'Something went wrong while fetching the note',
+        success: false,
+        message,
     });
-  }
+    }
 };
 
 export const updateNote = async (req, res) => {
   try {
     const note = await noteService.updateNote(req.params.id, req.user._id, req.body);
 
-    logger.info(`Note updated (id: ${note._id}) by user: ${req.user.email}`);
+    logger.info({ noteId: note._id, userId: req.user._id }, 'Note updated');
 
     res.status(200).json({
       success: true,
@@ -71,31 +86,43 @@ export const updateNote = async (req, res) => {
       data: note,
     });
   } catch (error) {
-    logger.warn(`Update note failed (id: ${req.params.id}): ${error.message}`);
+    logger.error(`Update note failed: ${error.message}`);
+
     const statusCode = error.statusCode || 500;
+    const message =
+        statusCode === 500
+        ? 'Something went wrong while updating the note'
+        : error.message;
+
     res.status(statusCode).json({
-      success: false,
-      message: error.message || 'Something went wrong while updating the note',
+        success: false,
+        message,
     });
-  }
+    }
 };
 
 export const deleteNote = async (req, res) => {
   try {
     await noteService.deleteNote(req.params.id, req.user._id);
 
-    logger.info(`Note deleted (id: ${req.params.id}) by user: ${req.user.email}`);
+    logger.info({ noteId: note._id, userId: req.user._id }, 'Note deleted');
 
     res.status(200).json({
       success: true,
       message: 'Note deleted successfully',
     });
   } catch (error) {
-    logger.warn(`Delete note failed (id: ${req.params.id}): ${error.message}`);
+    logger.error(`Delete note failed: ${error.message}`);
+
     const statusCode = error.statusCode || 500;
+    const message =
+        statusCode === 500
+        ? 'Something went wrong while deleting the note'
+        : error.message;
+
     res.status(statusCode).json({
-      success: false,
-      message: error.message || 'Something went wrong while deleting the note',
+        success: false,
+        message,
     });
-  }
+    }
 };

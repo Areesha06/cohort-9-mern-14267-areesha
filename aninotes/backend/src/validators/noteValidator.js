@@ -4,7 +4,7 @@ export const createNoteValidator = [
   body('title')
     .trim()
     .notEmpty().withMessage('Title is required')
-    .isLength({ max: 150 }).withMessage('Title must be less than 150 characters'),
+    .isLength({ max: 150 }).withMessage('Title must be 150 characters or fewer'),
 
   body('content')
     .trim()
@@ -16,7 +16,7 @@ export const updateNoteValidator = [
     .optional()
     .trim()
     .notEmpty().withMessage('Title cannot be empty')
-    .isLength({ max: 150 }).withMessage('Title must be less than 150 characters'),
+    .isLength({ max: 150 }).withMessage('Title must be 150 characters or fewer'),
 
   body('content')
     .optional()
