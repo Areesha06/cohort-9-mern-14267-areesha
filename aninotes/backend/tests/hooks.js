@@ -14,8 +14,6 @@ export const mochaHooks = {
   },
 
   async afterEach() {
-    // Wipe all collections between every single test so tests never
-    // leak data or depend on each other's leftovers.
     const collections = mongoose.connection.collections;
     for (const key in collections) {
       await collections[key].deleteMany({});

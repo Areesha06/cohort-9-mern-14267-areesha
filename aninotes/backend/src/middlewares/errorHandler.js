@@ -8,6 +8,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'CastError') {
     statusCode = 400;
     message = 'Invalid ID format';
+    isOperational = true;
   }
 
   if (err.name === 'ValidationError') {
@@ -15,6 +16,7 @@ const errorHandler = (err, req, res, next) => {
     message = Object.values(err.errors)
       .map((val) => val.message)
       .join(', ');
+    isOperational = true;
   }
 
   if (err.code === 11000) {
