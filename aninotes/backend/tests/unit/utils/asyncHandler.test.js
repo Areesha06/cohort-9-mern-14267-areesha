@@ -11,7 +11,11 @@ describe('Unit: asyncHandler', () => {
       res.done = true;
     });
 
-    await handler(req, res, next);
+    try {
+      await handler(req, res, next);
+    } catch (error) {
+      expect.fail(`Executing the wrapped function should not fail: ${error.message}`);
+    }
 
     expect(res.done).to.equal(true);
     expect(next.called).to.equal(false);
