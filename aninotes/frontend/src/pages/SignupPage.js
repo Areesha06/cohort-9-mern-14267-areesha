@@ -25,7 +25,6 @@ const SignupPage = () => {
 
     try {
       await register(formData);
-      // Registration succeeded — log the user straight in for a smooth flow.
       await login({ email: formData.email, password: formData.password });
       navigate('/dashboard');
     } catch (error) {
@@ -48,7 +47,7 @@ const SignupPage = () => {
   return (
     <AuthLayout title="Join AniNotes" subtitle="Create your account and start jotting things down.">
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
-        {formError && <div className="auth-banner-error">{formError}</div>}
+        {formError && (<div className="auth-banner-error" role="alert">{formError}</div>)}
 
         <div className="auth-field">
           <label htmlFor="username">Username</label>
@@ -60,8 +59,10 @@ const SignupPage = () => {
             value={formData.username}
             onChange={handleChange}
             required
+            aria-invalid={fieldErrors.username ? 'true' : 'false'}
+            aria-describedby={fieldErrors.username ? 'username-error' : undefined}
           />
-          {fieldErrors.username && <span className="auth-field-error">{fieldErrors.username}</span>}
+          {fieldErrors.username && (<span id="username-error" className="auth-field-error">{fieldErrors.username}</span>)}
         </div>
 
         <div className="auth-field">
@@ -74,8 +75,10 @@ const SignupPage = () => {
             value={formData.email}
             onChange={handleChange}
             required
+            aria-invalid={fieldErrors.email ? 'true' : 'false'}
+            aria-describedby={fieldErrors.email ? 'email-error' : undefined}
           />
-          {fieldErrors.email && <span className="auth-field-error">{fieldErrors.email}</span>}
+          {fieldErrors.email && (<span id="email-error" className="auth-field-error">{fieldErrors.email}</span>)}
         </div>
 
         <div className="auth-field">
@@ -88,8 +91,10 @@ const SignupPage = () => {
             value={formData.password}
             onChange={handleChange}
             required
+            aria-invalid={fieldErrors.password ? 'true' : 'false'}
+            aria-describedby={fieldErrors.password ? 'password-error' : undefined}
           />
-          {fieldErrors.password && <span className="auth-field-error">{fieldErrors.password}</span>}
+          {fieldErrors.password && (<span id="password-error" className="auth-field-error">{fieldErrors.password}</span>)}
         </div>
 
         <button className="auth-submit" type="submit" disabled={isSubmitting}>

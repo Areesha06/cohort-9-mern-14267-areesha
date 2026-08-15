@@ -19,8 +19,10 @@ export const AuthProvider = ({ children }) => {
       const res = await getMeRequest();
       setUser(res.data.data);
     } catch (error) {
-      localStorage.removeItem(TOKEN_KEY);
-      setUser(null);
+        if (error.response?.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        setUser(null);
+        }
     } finally {
       setIsLoading(false);
     }

@@ -46,7 +46,7 @@ const LoginPage = () => {
   return (
     <AuthLayout title="Welcome back!" subtitle="Log in to pick up right where you left off.">
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
-        {formError && <div className="auth-banner-error">{formError}</div>}
+        {formError && (<div className="auth-banner-error" role="alert">{formError}</div>)}
 
         <div className="auth-field">
           <label htmlFor="email">Email</label>
@@ -58,8 +58,10 @@ const LoginPage = () => {
             value={formData.email}
             onChange={handleChange}
             required
+            aria-invalid={fieldErrors.email ? 'true' : 'false'}
+            aria-describedby={fieldErrors.email ? 'email-error' : undefined}
           />
-          {fieldErrors.email && <span className="auth-field-error">{fieldErrors.email}</span>}
+          {fieldErrors.email && (<span id="email-error" className="auth-field-error">{fieldErrors.email}</span>)}
         </div>
 
         <div className="auth-field">
@@ -72,8 +74,10 @@ const LoginPage = () => {
             value={formData.password}
             onChange={handleChange}
             required
+            aria-invalid={fieldErrors.password ? 'true' : 'false'}
+            aria-describedby={fieldErrors.password ? 'password-error' : undefined}
           />
-          {fieldErrors.password && <span className="auth-field-error">{fieldErrors.password}</span>}
+          {fieldErrors.password && (<span id="password-error" className="auth-field-error">{fieldErrors.password}</span>)}
         </div>
 
         <button className="auth-submit" type="submit" disabled={isSubmitting}>
