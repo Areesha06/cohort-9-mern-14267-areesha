@@ -1,0 +1,126 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+}
+
+.auth-illustration {
+  flex: 1;
+  display: none;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: linear-gradient(160deg, var(--color-panel), #E9D5FF 70%);
+  overflow: hidden;
+}
+
+.auth-illustration .mascot {
+  animation: mascot-bounce 2.6s ease-in-out infinite;
+}
+
+@keyframes mascot-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.auth-illustration__tagline {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--color-text);
+  max-width: 260px;
+  text-align: center;
+}
+
+.sticky-note {
+  position: absolute;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 14px 16px;
+  border-radius: 6px;
+  box-shadow: var(--shadow-soft);
+  color: var(--color-text);
+}
+
+.sticky-note--one {
+  top: 14%;
+  left: 12%;
+  background: var(--color-accent);
+  transform: rotate(-8deg);
+}
+
+.sticky-note--two {
+  bottom: 16%;
+  right: 10%;
+  background: var(--color-secondary);
+  transform: rotate(6deg);
+}
+
+.washi-tape {
+  position: absolute;
+  width: 90px;
+  height: 26px;
+  opacity: 0.8;
+  border-radius: 3px;
+}
+
+.washi-tape--one {
+  top: 8%;
+  right: 20%;
+  background: repeating-linear-gradient(45deg, var(--color-primary), var(--color-primary) 8px, #ffffff 8px, #ffffff 16px);
+  transform: rotate(20deg);
+}
+
+.washi-tape--two {
+  bottom: 10%;
+  left: 22%;
+  background: repeating-linear-gradient(45deg, var(--color-secondary), var(--color-secondary) 8px, #ffffff 8px, #ffffff 16px);
+  transform: rotate(-15deg);
+}
+
+.auth-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background: var(--color-bg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-card__logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.auth-card__title {
+  font-size: 1.7rem;
+  color: var(--color-text);
+}
+
+.auth-card__subtitle {
+  color: var(--color-text-muted);
+  margin: 0 0 18px 0;
+  font-size: 0.95rem;
+}
+
+@media (min-width: 900px) {
+  .auth-illustration {
+    display: flex;
+  }
+}

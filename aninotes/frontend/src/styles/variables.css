@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Color tokens — the AniNotes palette */
+  --color-bg: #FBF3FF;
+  --color-panel: #F3E8FF;
+  --color-primary: #FF7FAE;
+  --color-primary-dark: #F2578F;
+  --color-secondary: #7FE7C4;
+  --color-accent: #FFD976;
+  --color-text: #3B2454;
+  --color-text-muted: #8874A8;
+  --color-white: #FFFFFF;
+  --color-border: #E3D3F7;
+  --color-error: #E8567A;
+  --color-error-bg: #FFE7ED;
+
+  /* Type tokens */
+  --font-display: 'Baloo 2', cursive;
+  --font-body: 'Quicksand', sans-serif;
+
+  /* Shape tokens */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --shadow-soft: 0 8px 24px rgba(59, 36, 84, 0.12);
+  --shadow-button: 0 6px 0 var(--color-primary-dark);
+}
