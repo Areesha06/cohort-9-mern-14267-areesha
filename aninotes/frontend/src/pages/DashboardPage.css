@@ -1,10 +1,35 @@
-.dashboard-placeholder {
+.dashboard-page {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
+  background: var(--color-bg);
+}
+
+.dashboard-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+.dashboard-content__title {
+  font-size: 1.6rem;
+  margin-bottom: 24px;
+}
+
+.dashboard-state {
   text-align: center;
-  padding: 24px;
+  color: var(--color-text-muted);
+  padding: 60px 20px;
+}
+
+.dashboard-state--error {
+  color: var(--color-error);
+}
+
+.dashboard-state__retry {
+  margin-top: 12px;
+  background: var(--color-white);
+  border: 2px solid var(--color-error);
+  color: var(--color-error);
+  border-radius: var(--radius-sm);
+  padding: 8px 18px;
+  font-weight: 600;
 }
