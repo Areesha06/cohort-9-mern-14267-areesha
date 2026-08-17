@@ -25,19 +25,35 @@ const SignupPage = () => {
 
     try {
       await register(formData);
-      await login({ email: formData.email, password: formData.password });
-      navigate('/dashboard');
+
+      try {
+        await login({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        navigate('/dashboard');
+      } catch (loginError) {
+        setFormError(
+          'Your account was created successfully, but automatic login failed. Please log in manually.'
+        );
+      }
     } catch (error) {
       const response = error.response;
 
       if (response?.status === 400 && response.data?.errors) {
         const errors = {};
+
         response.data.errors.forEach((err) => {
           errors[err.field] = err.message;
         });
+
         setFieldErrors(errors);
       } else {
-        setFormError(response?.data?.message || 'Something went wrong. Please try again.');
+        setFormError(
+          response?.data?.message ||
+            'Something went wrong. Please try again.'
+        );
       }
     } finally {
       setIsSubmitting(false);
