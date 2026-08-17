@@ -10,21 +10,24 @@ const NoteCard = ({ note, onDelete }) => {
   };
 
   return (
-    <Link to={`/notes/${note._id}`} className="note-card">
-      <div className="note-card__tape" aria-hidden="true" />
-      <h3 className="note-card__title">{note.title}</h3>
-      <p className="note-card__preview">{getContentPreview(note.content)}</p>
-      <div className="note-card__footer">
-        <span className="note-card__date">Updated {formatDate(note.updatedAt)}</span>
+    <div className="note-card">
+        <Link to={`/notes/${note._id}`} className="note-card__link">
+            <div className="note-card__tape" aria-hidden="true" />
+            <h3 className="note-card__title">{note.title}</h3>
+            <p className="note-card__preview">{getContentPreview(note.content)}</p>
+            <div className="note-card__footer">
+                <span className="note-card__date">Updated {formatDate(note.updatedAt)}</span>
+            </div>
+        </Link>
+
         <button
-          className="note-card__delete"
-          onClick={handleDelete}
-          aria-label={`Delete note titled ${note.title}`}
+            className="note-card__delete"
+            onClick={handleDelete}
+            aria-label={`Delete note titled ${note.title}`}
         >
-          🗑
+            🗑
         </button>
-      </div>
-    </Link>
+    </div>
   );
 };
 
