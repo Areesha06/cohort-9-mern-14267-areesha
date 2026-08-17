@@ -21,7 +21,10 @@ export const mochaHooks = {
   },
 
   async afterAll() {
-    await mongoose.connection.close();
-    if (mongoServer) await mongoServer.stop();
+    try {
+      await mongoose.connection.close();
+    } finally {
+      if (mongoServer) await mongoServer.stop();
+    }
   },
 };
