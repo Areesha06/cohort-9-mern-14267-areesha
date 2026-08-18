@@ -9,7 +9,7 @@ const TOOLBAR_OPTIONS = [
   ['clean'],
 ];
 
-const RichTextEditor = ({ value, onChange, placeholder }) => {
+const RichTextEditor = ({ value, onChange, placeholder, ariaLabelledBy }) => {
   return (
     <ReactQuill
       theme="snow"
@@ -18,7 +18,9 @@ const RichTextEditor = ({ value, onChange, placeholder }) => {
       placeholder={placeholder}
       modules={{ toolbar: TOOLBAR_OPTIONS }}
       className="rich-text-editor"
-    />
+    >
+      <div aria-labelledby={ariaLabelledBy} />
+    </ReactQuill>
   );
 };
 

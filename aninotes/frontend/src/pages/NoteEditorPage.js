@@ -143,8 +143,8 @@ const NoteEditorPage = () => {
         </div>
 
         <div className="note-editor-field">
-          <label htmlFor="content">Content</label>
-          <RichTextEditor value={content} onChange={setContent} placeholder="Start writing…" />
+          <label id="content-label">Content</label>
+          <RichTextEditor value={content} onChange={setContent} placeholder="Start writing…" ariaLabelledBy="content-label" />
           {fieldErrors.content && <span className="auth-field-error">{fieldErrors.content}</span>}
         </div>
 

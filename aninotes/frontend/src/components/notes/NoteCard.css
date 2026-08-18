@@ -8,7 +8,7 @@
   color: var(--color-text);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   text-decoration: none;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .note-card__link {
@@ -43,8 +43,7 @@
   font-size: 1.1rem;
   margin-bottom: 8px;
   padding-right: 8px;
-  overflow-wrap: break-word;
-  word-break: break-word;
+  overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -57,8 +56,7 @@
   line-height: 1.5;
   margin: 0 0 14px 0;
   min-height: 3.2em;
-  overflow-wrap: break-word;
-  word-break: break-word;
+  overflow-wrap: anywhere;
   white-space: normal;
   display: -webkit-box;
   -webkit-line-clamp: 3;
