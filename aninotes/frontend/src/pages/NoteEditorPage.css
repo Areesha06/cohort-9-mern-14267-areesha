@@ -1,0 +1,92 @@
+.note-editor-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+  background: var(--color-bg);
+}
+
+.note-editor-card {
+  width: 100%;
+  max-width: 720px;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.note-editor-title {
+  font-size: 1.6rem;
+}
+
+.note-editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.note-editor-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.note-editor-field input {
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  background: #FDFBFF;
+}
+
+.note-editor-field input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.note-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.note-editor-cancel {
+  background: none;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 20px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.note-editor-cancel:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.note-editor-save {
+  max-width: 200px;
+}
+
+.note-editor-state {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 100px 20px;
+}
+
+.note-editor-state--error {
+  color: var(--color-error);
+}
+
+.note-editor-back-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-weight: 600;
+}
