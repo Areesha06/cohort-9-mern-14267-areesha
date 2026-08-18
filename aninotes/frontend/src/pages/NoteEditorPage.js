@@ -20,7 +20,19 @@ const NoteEditorPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isEditMode) return;
+    setFieldErrors({});
+    setFormError('');
+
+    if (!isEditMode) {
+        setTitle('');
+        setContent('');
+        setPageStatus('ready');
+        return;
+    }
+
+    setTitle('');
+    setContent('');
+    setPageStatus('loading');
 
     let isMounted = true;
 
