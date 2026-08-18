@@ -36,7 +36,7 @@ a:hover {
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-secondary);
+  outline: 3px solid var(--color-text);
   outline-offset: 2px;
 }
 
