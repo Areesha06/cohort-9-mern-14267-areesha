@@ -22,19 +22,19 @@ jobs:
           node-version: 20
 
       - name: Install backend dependencies
-        working-directory: backend
+        working-directory: aninotes/backend
         run: npm ci
 
       - name: Run backend tests with coverage
-        working-directory: backend
+        working-directory: aninotes/backend
         run: npm run test:coverage
 
       - name: Install frontend dependencies
-        working-directory: frontend
+        working-directory: aninotes/frontend
         run: npm ci
 
       - name: Run frontend tests with coverage
-        working-directory: frontend
+        working-directory: aninotes/frontend
         run: npm run test:coverage
 
       - name: SonarQube Scan
