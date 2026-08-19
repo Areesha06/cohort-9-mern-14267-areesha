@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
-import NoteEditorPlaceholder from './pages/NoteEditorPlaceholder';
+import NoteEditorPage from './pages/NoteEditorPage';
 import ProtectedRoute from './routes/ProtectedRoute';
 
 function App() {
@@ -22,7 +22,7 @@ function App() {
         path="/notes/new"
         element={
           <ProtectedRoute>
-            <NoteEditorPlaceholder />
+            <NoteEditorPage />
           </ProtectedRoute>
         }
       />
@@ -30,7 +30,7 @@ function App() {
         path="/notes/:id"
         element={
           <ProtectedRoute>
-            <NoteEditorPlaceholder />
+            <NoteEditorPage />
           </ProtectedRoute>
         }
       />

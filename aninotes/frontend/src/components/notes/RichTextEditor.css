@@ -1,0 +1,28 @@
+.rich-text-editor .ql-toolbar {
+  border: 2px solid var(--color-border);
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: #FDFBFF;
+}
+
+.rich-text-editor .ql-container {
+  border: 2px solid var(--color-border);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.98rem;
+  min-height: 240px;
+}
+
+.rich-text-editor .ql-editor {
+  min-height: 240px;
+}
+
+.rich-text-editor .ql-editor.ql-blank::before {
+  color: var(--color-text-muted);
+  font-style: normal;
+}
+
+.rich-text-editor:focus-within .ql-toolbar,
+.rich-text-editor:focus-within .ql-container {
+  border-color: var(--color-primary);
+}
