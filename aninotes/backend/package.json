@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "test": "cross-env NODE_ENV=test mocha",
-    "coverage": "c8 mocha"
+    "coverage": "c8 mocha",
+    "test:coverage": "cross-env NODE_ENV=test c8 mocha"
   },
   "keywords": [],
   "author": "",
