@@ -36,6 +36,7 @@ export const loginUser = asyncHandler(async (req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
+      createdAt: user.createdAt,
     },
   });
 });
@@ -48,6 +49,7 @@ export const getMe = (req, res) => {
       id: req.user._id,
       username: req.user.username,
       email: req.user.email,
+      createdAt: req.user.createdAt,
     },
   });
 };

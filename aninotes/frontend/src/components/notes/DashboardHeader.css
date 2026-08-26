@@ -58,3 +58,17 @@
   border-color: var(--color-primary);
   color: var(--color-primary-dark);
 }
+
+.dashboard-header__profile-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s ease;
+}
+
+.dashboard-header__profile-link:hover {
+  background: var(--color-panel);
+  text-decoration: none;
+}
