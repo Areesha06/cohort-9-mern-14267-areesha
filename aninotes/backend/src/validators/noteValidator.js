@@ -33,5 +33,5 @@ export const searchNotesValidator = [
   query('search')
     .optional()
     .trim()
-    .isLength({ max: 100 }).withMessage('Search term must be less than 100 characters'),
+    .isLength({ max: 100 }).withMessage('Search term must be 100 characters or fewer.'),
 ];
