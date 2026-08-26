@@ -1,4 +1,4 @@
-import { body, param } from 'express-validator';
+import { body, param, query } from 'express-validator';
 
 export const createNoteValidator = [
   body('title')
@@ -27,4 +27,11 @@ export const updateNoteValidator = [
 export const noteIdValidator = [
   param('id')
     .isMongoId().withMessage('Invalid note ID'),
+];
+
+export const searchNotesValidator = [
+  query('search')
+    .optional()
+    .trim()
+    .isLength({ max: 100 }).withMessage('Search term must be less than 100 characters'),
 ];
