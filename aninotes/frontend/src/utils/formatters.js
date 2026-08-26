@@ -1,3 +1,5 @@
+import DOMPurify from 'dompurify';
+
 export const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
@@ -20,4 +22,12 @@ export const getContentPreview = (content, maxLength = 120) => {
   const plainText = stripHtml(content);
   if (plainText.length <= maxLength) return plainText;
   return `${plainText.slice(0, maxLength).trim()}…`;
+};
+
+export const sanitizeHtml = (html) => {
+  if (!html) return '';
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'ol', 'ul', 'li', 'blockquote', 'b', 'i'],
+    ALLOWED_ATTR: [],
+  });
 };
