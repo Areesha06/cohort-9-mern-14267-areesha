@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import DashboardHeader from '../components/notes/DashboardHeader';
 import SearchBar from '../components/notes/SearchBar';
 import NoteList from '../components/notes/NoteList';
@@ -16,23 +16,39 @@ const DashboardPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 400);
+  const fetchGeneration = useRef(0);
 
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importSummary, setImportSummary] = useState(null);
 
-  const fetchNotes = useCallback(async (search) => {
-    setStatus('loading');
-    setErrorMessage('');
-    try {
-      const res = await getNotesRequest(search);
-      setNotes(res.data.data);
-      setStatus('success');
-    } catch (error) {
-      setErrorMessage(error.response?.data?.message || 'Could not load your notes. Please try again.');
-      setStatus('error');
+const fetchNotes = useCallback(async (search) => {
+  const generation = ++fetchGeneration.current;
+
+  setStatus('loading');
+  setErrorMessage('');
+
+  try {
+    const res = await getNotesRequest(search);
+
+    if (generation !== fetchGeneration.current) {
+      return;
     }
-  }, []);
+
+    setNotes(res.data.data);
+    setStatus('success');
+  } catch (error) {
+    if (generation !== fetchGeneration.current) {
+      return;
+    }
+
+    setErrorMessage(
+      error.response?.data?.message ||
+        'Could not load your notes. Please try again.'
+    );
+    setStatus('error');
+  }
+}, []);
 
   useEffect(() => {
     fetchNotes(debouncedSearchTerm);
