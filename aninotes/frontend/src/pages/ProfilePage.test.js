@@ -1,3 +1,8 @@
+jest.mock('../socket/socketClient', () => ({
+  connectSocket: jest.fn(),
+  disconnectSocket: jest.fn(),
+}));
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
@@ -24,7 +29,13 @@ jest.mock('../api/notesApi', () => ({
 const renderProfile = () => {
   localStorage.setItem('aninotes_token', 'fake-token');
   getMeRequest.mockResolvedValue({
-    data: { data: { username: 'johndoe', email: 'john@example.com', createdAt: '2026-01-01T00:00:00.000Z' } },
+    data: {
+      data: {
+        username: 'johndoe',
+        email: 'john@example.com',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+    },
   });
 
   return render(
@@ -91,6 +102,9 @@ describe('ProfilePage', () => {
     renderProfile();
 
     await screen.findByText('johndoe');
-    expect(screen.getByRole('link', { name: /back to dashboard/i })).toHaveAttribute('href', '/dashboard');
+    expect(screen.getByRole('link', { name: /back to dashboard/i })).toHaveAttribute(
+      'href',
+      '/dashboard'
+    );
   });
 });

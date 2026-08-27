@@ -18,9 +18,17 @@ export const AuthProvider = ({ children }) => {
     }
     try {
       const res = await getMeRequest();
+      if (localStorage.getItem(TOKEN_KEY) !== token) {
+        return;
+      }
+
       setUser(res.data.data);
       connectSocket(token);
     } catch (error) {
+      if (localStorage.getItem(TOKEN_KEY) !== token) {
+        return;
+      }
+
       if (error.response?.status === 401) {
         localStorage.removeItem(TOKEN_KEY);
         setUser(null);
@@ -36,11 +44,17 @@ export const AuthProvider = ({ children }) => {
   }, [loadCurrentUser]);
 
   const login = async (credentials) => {
-    const res = await loginRequest(credentials);
-    localStorage.setItem(TOKEN_KEY, res.data.token);
-    setUser(res.data.data);
-    connectSocket(res.data.token);
-    return res.data;
+    try {
+      const res = await loginRequest(credentials);
+
+      localStorage.setItem(TOKEN_KEY, res.data.token);
+      setUser(res.data.data);
+      connectSocket(res.data.token);
+
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
   };
 
   const register = async (details) => {
