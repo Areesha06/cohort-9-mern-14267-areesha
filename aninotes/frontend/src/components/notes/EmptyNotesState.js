@@ -2,12 +2,13 @@ import { Link } from 'react-router-dom';
 import './EmptyNotesState.css';
 
 const EmptyNotesState = ({ searchTerm }) => {
-  if (searchTerm) {
+  const trimmedSearchTerm = searchTerm.trim();
+  if (trimmedSearchTerm) {
     return (
       <div className="empty-notes">
         <div className="empty-notes__blob" aria-hidden="true">🔍</div>
         <h2>No matches found</h2>
-        <p>Nothing matched "{searchTerm}". Try a different search.</p>
+        <p>Nothing matched "{trimmedSearchTerm}". Try a different search.</p>
       </div>
     );
   }

@@ -51,12 +51,16 @@ const DashboardPage = () => {
     const confirmed = window.confirm('Delete this note? This can’t be undone.');
     if (!confirmed) return;
 
+    const deleteSearchTerm = debouncedSearchTerm;
+
     setNotes((current) => current.filter((note) => note._id !== noteId));
 
     try {
       await deleteNoteRequest(noteId);
     } catch (error) {
-      await fetchNotes(debouncedSearchTerm);
+      if (deleteSearchTerm === debouncedSearchTerm) {
+        await fetchNotes(debouncedSearchTerm);
+      }
 
       alert(
         error.response?.data?.message ||
