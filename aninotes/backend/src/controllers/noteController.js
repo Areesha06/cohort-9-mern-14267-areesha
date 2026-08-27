@@ -1,12 +1,14 @@
 import * as noteService from '../services/noteService.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import logger from '../utils/logger.js';
+import { emitToUser } from '../config/socket.js';
 
 export const createNote = asyncHandler(async (req, res) => {
   const { title, content } = req.body;
   const note = await noteService.createNote({ title, content, userId: req.user._id });
 
   logger.info({ noteId: note._id, userId: req.user._id }, 'Note created');
+  emitToUser(req.user._id, 'note:created', note);
 
   res.status(201).json({
     success: true,
@@ -39,6 +41,7 @@ export const updateNote = asyncHandler(async (req, res) => {
   const note = await noteService.updateNote(req.params.id, req.user._id, req.body);
 
   logger.info({ noteId: note._id, userId: req.user._id }, 'Note updated');
+  emitToUser(req.user._id, 'note:updated', note);
 
   res.status(200).json({
     success: true,
@@ -51,6 +54,7 @@ export const deleteNote = asyncHandler(async (req, res) => {
   await noteService.deleteNote(req.params.id, req.user._id);
 
   logger.info({ noteId: req.params.id, userId: req.user._id }, 'Note deleted');
+  emitToUser(req.user._id, 'note:deleted', { id: req.params.id });
 
   res.status(200).json({
     success: true,

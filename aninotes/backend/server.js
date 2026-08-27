@@ -1,7 +1,9 @@
 import 'dotenv/config';
+import http from 'http';
 import app from './src/app.js';
 import connectDB from './src/config/db.js';
 import logger from './src/utils/logger.js';
+import { initializeSocket } from './src/config/socket.js';
 
 const rawPort = process.env.PORT;
 
@@ -30,8 +32,12 @@ if (!JWT_EXPIRES_IN || JWT_EXPIRES_IN.trim() === '') {
   throw new Error('JWT_EXPIRES_IN must be configured');
 }
 
+const httpServer = http.createServer(app);
+
+initializeSocket(httpServer);
+
 connectDB().then(() => {
-  app.listen(PORT, () => {
+  httpServer.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
   });
 });
