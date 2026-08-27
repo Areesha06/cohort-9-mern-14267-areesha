@@ -42,14 +42,17 @@ const DashboardPage = () => {
     const confirmed = window.confirm('Delete this note? This can’t be undone.');
     if (!confirmed) return;
 
-    const previousNotes = notes;
     setNotes((current) => current.filter((note) => note._id !== noteId));
 
     try {
       await deleteNoteRequest(noteId);
     } catch (error) {
-      setNotes(previousNotes);
-      alert(error.response?.data?.message || 'Could not delete the note. Please try again.');
+      await fetchNotes(debouncedSearchTerm);
+
+      alert(
+        error.response?.data?.message ||
+          'Could not delete the note. Please try again.'
+      );
     }
   };
 

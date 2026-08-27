@@ -13,7 +13,7 @@ const DashboardHeader = () => {
       <div className="dashboard-header__actions">
         <Link to="/notes/new" className="dashboard-header__new-btn">+ New note</Link>
 
-        <Link to="/profile" className="dashboard-header__profile-link" aria-label="View profile">
+        <Link to="/profile" className="dashboard-header__profile-link">
           <Avatar username={user?.username} size={34} />
           <span className="dashboard-header__greeting">Hi, {user?.username}</span>
         </Link>
