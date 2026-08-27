@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import DashboardPage from './DashboardPage';
 import { AuthProvider } from '../context/AuthContext';
 import { getMeRequest } from '../api/authApi';
-import { getNotesRequest, deleteNoteRequest } from '../api/notesApi';
+import { getNotesRequest, createNoteRequest, deleteNoteRequest } from '../api/notesApi';
 import { routerFuture } from '../test-utils/routerFuture';
 
 jest.mock('../api/authApi', () => ({
@@ -129,5 +129,53 @@ describe('DashboardPage', () => {
     await userEvent.type(screen.getByLabelText(/search notes/i), 'nomatch');
 
     expect(await screen.findByText('No matches found', {}, { timeout: 2000 })).toBeInTheDocument();
+  });
+
+  describe('Export / Import', () => {
+    beforeEach(() => {
+      global.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
+      global.URL.revokeObjectURL = jest.fn();
+    });
+
+    it('fetches the full unfiltered note list and triggers a download when Export is clicked', async () => {
+      getNotesRequest.mockResolvedValue({ data: { count: 2, data: sampleNotes } });
+      renderDashboard();
+      await screen.findByText('First Note');
+
+      await userEvent.click(screen.getByRole('button', { name: /export notes/i }));
+
+      await waitFor(() => expect(getNotesRequest).toHaveBeenLastCalledWith());
+      expect(global.URL.createObjectURL).toHaveBeenCalled();
+    });
+
+    it('imports a note from a selected file and shows a success summary', async () => {
+      getNotesRequest.mockResolvedValue({ data: { count: 2, data: sampleNotes } });
+      createNoteRequest.mockResolvedValue({ data: { data: { _id: 'new1' } } });
+
+      renderDashboard();
+      await screen.findByText('First Note');
+
+      const file = new File(
+        [JSON.stringify([{ title: 'Imported Note', content: '<p>Hi</p>' }])],
+        'import.json',
+        { type: 'application/json' }
+      );
+
+      await userEvent.upload(screen.getByLabelText(/import note files/i), file);
+
+      expect(await screen.findByText(/1 note imported successfully/i)).toBeInTheDocument();
+      expect(createNoteRequest).toHaveBeenCalledWith({ title: 'Imported Note', content: '<p>Hi</p>' });
+    });
+
+    it('shows an error summary when an imported file has invalid JSON', async () => {
+      getNotesRequest.mockResolvedValue({ data: { count: 2, data: sampleNotes } });
+      renderDashboard();
+      await screen.findByText('First Note');
+
+      const badFile = new File(['not json'], 'broken.json', { type: 'application/json' });
+      await userEvent.upload(screen.getByLabelText(/import note files/i), badFile);
+
+      expect(await screen.findByText(/could not be imported/i)).toBeInTheDocument();
+    });
   });
 });
