@@ -88,6 +88,43 @@ describe('Integration: /api/notes', () => {
     });
   });
 
+  describe('GET /api/notes with search', () => {
+    beforeEach(async () => {
+      await request(app).post('/api/notes').set('Authorization', `Bearer ${tokenA}`).send({ title: 'Grocery List', content: 'Milk and eggs' });
+      await request(app).post('/api/notes').set('Authorization', `Bearer ${tokenA}`).send({ title: 'Weekend Plan', content: 'Hiking trip' });
+    });
+
+    it('should return only notes matching the search term in the title', async () => {
+      const res = await request(app).get('/api/notes?search=grocery').set('Authorization', `Bearer ${tokenA}`);
+      expect(res.status).to.equal(200);
+      expect(res.body.count).to.equal(1);
+      expect(res.body.data[0].title).to.equal('Grocery List');
+    });
+
+    it('should return only notes matching the search term in the content', async () => {
+      const res = await request(app).get('/api/notes?search=hiking').set('Authorization', `Bearer ${tokenA}`);
+      expect(res.status).to.equal(200);
+      expect(res.body.data[0].title).to.equal('Weekend Plan');
+    });
+
+    it('should be case-insensitive', async () => {
+      const res = await request(app).get('/api/notes?search=GROCERY').set('Authorization', `Bearer ${tokenA}`);
+      expect(res.body.count).to.equal(1);
+    });
+
+    it('should return an empty array when nothing matches', async () => {
+      const res = await request(app).get('/api/notes?search=nonexistentterm').set('Authorization', `Bearer ${tokenA}`);
+      expect(res.status).to.equal(200);
+      expect(res.body.count).to.equal(0);
+    });
+
+    it('should reject a search term longer than 100 characters', async () => {
+      const longSearch = 'a'.repeat(101);
+      const res = await request(app).get(`/api/notes?search=${longSearch}`).set('Authorization', `Bearer ${tokenA}`);
+      expect(res.status).to.equal(400);
+    });
+  });
+
   describe('PUT /api/notes/:id', () => {
     let noteId;
 

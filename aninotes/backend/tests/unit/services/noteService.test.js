@@ -18,6 +18,27 @@ describe('Unit: noteService', () => {
     });
   });
 
+  describe('getNotesByUser with search', () => {
+    it('should add a case-insensitive $or filter when a search term is given', async () => {
+      const stub = sinon.stub(Note, 'find').returns({ sort: sinon.stub().resolves([]) });
+
+      await noteService.getNotesByUser('user1', 'grocery');
+
+      const queryArg = stub.firstCall.args[0];
+      expect(queryArg.user).to.equal('user1');
+      expect(queryArg.$or).to.be.an('array').with.lengthOf(2);
+    });
+
+    it('should not add a search filter when no search term is given', async () => {
+      const stub = sinon.stub(Note, 'find').returns({ sort: sinon.stub().resolves([]) });
+
+      await noteService.getNotesByUser('user1');
+
+      const queryArg = stub.firstCall.args[0];
+      expect(queryArg).to.deep.equal({ user: 'user1' });
+    });
+  });
+
   describe('getNotesByUser', () => {
     it('should return all notes belonging to the user', async () => {
       const fakeNotes = [{ title: 'B' }, { title: 'A' }];

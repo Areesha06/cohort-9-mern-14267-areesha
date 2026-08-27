@@ -98,4 +98,36 @@ describe('DashboardPage', () => {
     expect(deleteNoteRequest).not.toHaveBeenCalled();
     expect(screen.getByText('First Note')).toBeInTheDocument();
   });
+
+  it('renders a search bar', async () => {
+    getNotesRequest.mockResolvedValue({ data: { data: sampleNotes } });
+    renderDashboard();
+    expect(await screen.findByLabelText(/search notes/i)).toBeInTheDocument();
+  });
+
+  it('calls getNotesRequest with the search term after the debounce delay', async () => {
+    getNotesRequest.mockResolvedValue({ data: { data: sampleNotes } });
+    renderDashboard();
+    await screen.findByText('First Note');
+
+    await userEvent.type(screen.getByLabelText(/search notes/i), 'grocery');
+
+    await waitFor(
+      () => expect(getNotesRequest).toHaveBeenCalledWith('grocery'),
+      { timeout: 2000 }
+    );
+  });
+
+  it('shows a "no matches" message when a search returns no results', async () => {
+    getNotesRequest
+      .mockResolvedValueOnce({ data: { data: sampleNotes } })
+      .mockResolvedValueOnce({ data: { data: [] } });
+
+    renderDashboard();
+    await screen.findByText('First Note');
+
+    await userEvent.type(screen.getByLabelText(/search notes/i), 'nomatch');
+
+    expect(await screen.findByText('No matches found', {}, { timeout: 2000 })).toBeInTheDocument();
+  });
 });

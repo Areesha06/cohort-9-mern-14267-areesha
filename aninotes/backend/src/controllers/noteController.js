@@ -16,7 +16,8 @@ export const createNote = asyncHandler(async (req, res) => {
 });
 
 export const getNotes = asyncHandler(async (req, res) => {
-  const notes = await noteService.getNotesByUser(req.user._id);
+  const { search } = req.query;
+  const notes = await noteService.getNotesByUser(req.user._id, search);
 
   res.status(200).json({
     success: true,
