@@ -32,6 +32,8 @@ export const noteIdValidator = [
 export const searchNotesValidator = [
   query('search')
     .optional()
+    .isString()
+    .withMessage("Search term must be a string.")
     .trim()
     .isLength({ max: 100 }).withMessage('Search term must be 100 characters or fewer.'),
 ];

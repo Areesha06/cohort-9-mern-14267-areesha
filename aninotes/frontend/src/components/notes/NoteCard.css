@@ -88,3 +88,36 @@
   opacity: 1;
   background: var(--color-error-bg);
 }
+
+.note-card__preview p {
+  margin: 0 0 4px 0;
+}
+
+.note-card__preview p:last-child {
+  margin-bottom: 0;
+}
+
+.note-card__preview ul,
+.note-card__preview ol {
+  margin: 0 0 4px 18px;
+  padding: 0;
+}
+
+.note-card__preview li {
+  margin: 0;
+}
+
+.note-card__preview strong {
+  font-weight: 700;
+}
+
+.note-card__preview em {
+  font-style: italic;
+}
+
+.note-card__preview blockquote {
+  margin: 4px 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--color-border);
+  color: var(--color-text-muted);
+}

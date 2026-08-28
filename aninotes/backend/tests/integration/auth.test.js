@@ -105,10 +105,11 @@ describe('Integration: /api/auth', () => {
       expect(res.status).to.equal(401);
     });
 
-    it('should return the current user for a valid token', async () => {
+    it('should return the current user, including createdAt, for a valid token', async () => {
       const res = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`);
       expect(res.status).to.equal(200);
       expect(res.body.data.email).to.equal(validUser.email);
+      expect(res.body.data).to.have.property('createdAt');
     });
 
     it('should reject an expired token with 401', async () => {

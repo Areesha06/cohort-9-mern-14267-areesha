@@ -123,6 +123,11 @@ describe('Integration: /api/notes', () => {
       const res = await request(app).get(`/api/notes?search=${longSearch}`).set('Authorization', `Bearer ${tokenA}`);
       expect(res.status).to.equal(400);
     });
+
+    it('should reject repeated search query parameters', async () => {
+      const res = await request(app).get('/api/notes?search=one&search=two').set('Authorization', `Bearer ${tokenA}`);
+      expect(res.status).to.equal(400);
+    });    
   });
 
   describe('PUT /api/notes/:id', () => {
