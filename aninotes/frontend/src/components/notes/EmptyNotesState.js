@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import './EmptyNotesState.css';
 
-const EmptyNotesState = ({ searchTerm }) => {
+const EmptyNotesState = ({ searchTerm = '' }) => {
   const trimmedSearchTerm = searchTerm.trim();
   if (trimmedSearchTerm) {
     return (

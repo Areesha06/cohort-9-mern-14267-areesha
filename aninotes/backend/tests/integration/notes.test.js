@@ -125,9 +125,18 @@ describe('Integration: /api/notes', () => {
     });
 
     it('should reject repeated search query parameters', async () => {
-      const res = await request(app).get('/api/notes?search=one&search=two').set('Authorization', `Bearer ${tokenA}`);
-      expect(res.status).to.equal(400);
-    });    
+      try {
+        const res = await request(app)
+          .get('/api/notes?search=one&search=two')
+          .set('Authorization', `Bearer ${tokenA}`);
+
+        expect(res.status).to.equal(400);
+      } catch (error) {
+        throw new Error(
+          `Repeated search query request failed: GET /api/notes?search=one&search=two - ${error.message}`
+        );
+      }
+    });
   });
 
   describe('PUT /api/notes/:id', () => {
