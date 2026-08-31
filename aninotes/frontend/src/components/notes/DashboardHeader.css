@@ -72,3 +72,20 @@
   background: var(--color-panel);
   text-decoration: none;
 }
+
+.dashboard-header__live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  margin-left: 8px;
+  vertical-align: middle;
+  opacity: 0.5;
+}
+
+.dashboard-header__live-dot.is-live {
+  background: var(--color-secondary);
+  opacity: 1;
+  box-shadow: 0 0 0 3px rgba(127, 231, 196, 0.25);
+}

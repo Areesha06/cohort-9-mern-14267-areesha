@@ -1,3 +1,9 @@
+jest.mock('../socket/socketClient', () => ({
+  connectSocket: jest.fn(),
+  disconnectSocket: jest.fn(),
+  getSocket: jest.fn(),
+}));
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -6,6 +12,7 @@ import { AuthProvider } from '../context/AuthContext';
 import { getMeRequest } from '../api/authApi';
 import { getNotesRequest, createNoteRequest, deleteNoteRequest } from '../api/notesApi';
 import { routerFuture } from '../test-utils/routerFuture';
+import { getSocket } from '../socket/socketClient';
 
 jest.mock('../api/authApi', () => ({
   loginRequest: jest.fn(),
@@ -26,6 +33,13 @@ const sampleNotes = [
   { _id: '2', title: 'Second Note', content: '<p>World</p>', updatedAt: '2026-01-11T10:00:00.000Z' },
 ];
 
+const mockSocket = {
+  connected: false,
+  on: jest.fn(),
+  off: jest.fn(),
+  disconnect: jest.fn(),
+};
+
 const renderDashboard = () => {
   localStorage.setItem('aninotes_token', 'fake-token');
   getMeRequest.mockResolvedValue({ data: { data: { username: 'johndoe' } } });
@@ -41,6 +55,11 @@ describe('DashboardPage', () => {
   beforeEach(() => {
     localStorage.clear();
     jest.clearAllMocks();
+
+    getSocket.mockReturnValue(mockSocket);
+    mockSocket.on.mockClear();
+    mockSocket.off.mockClear();
+    mockSocket.disconnect.mockClear();
   });
 
   it('shows a loading state while notes are being fetched', () => {
@@ -176,6 +195,39 @@ describe('DashboardPage', () => {
       await userEvent.upload(screen.getByLabelText(/import note files/i), badFile);
 
       expect(await screen.findByText(/could not be imported/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Real-time updates via Socket.IO', () => {
+    it('refetches notes when a note:created event is received', async () => {
+      getNotesRequest.mockResolvedValue({
+        data: {
+          count: 2,
+          data: sampleNotes,
+        },
+      });
+
+      getSocket.mockReturnValue(mockSocket);
+
+      renderDashboard();
+
+      await screen.findByText('First Note');
+
+      getNotesRequest.mockClear();
+
+      const socketCall = mockSocket.on.mock.calls.find(
+        ([event]) => event === 'note:created'
+      );
+
+      expect(socketCall).toBeDefined();
+
+      const handler = socketCall[1];
+
+      handler();
+
+      await waitFor(() => {
+        expect(getNotesRequest).toHaveBeenCalled();
+      });
     });
   });
 });

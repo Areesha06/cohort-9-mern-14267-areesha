@@ -8,6 +8,7 @@ import ImportSummaryBanner from '../components/notes/ImportSummaryBanner';
 import { getNotesRequest, createNoteRequest, deleteNoteRequest } from '../api/notesApi';
 import { downloadExportFile, parseImportFiles } from '../utils/notesTransfer';
 import { useDebounce } from '../hooks/useDebounce';
+import { getSocket } from '../socket/socketClient';
 import './DashboardPage.css';
 
 const DashboardPage = () => {
@@ -53,6 +54,25 @@ const fetchNotes = useCallback(async (search) => {
   useEffect(() => {
     fetchNotes(debouncedSearchTerm);
   }, [debouncedSearchTerm, fetchNotes]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleRemoteChange = () => {
+      fetchNotes(debouncedSearchTerm);
+    };
+
+    socket.on('note:created', handleRemoteChange);
+    socket.on('note:updated', handleRemoteChange);
+    socket.on('note:deleted', handleRemoteChange);
+
+    return () => {
+      socket.off('note:created', handleRemoteChange);
+      socket.off('note:updated', handleRemoteChange);
+      socket.off('note:deleted', handleRemoteChange);
+    };
+  }, [debouncedSearchTerm, fetchNotes]);  
 
   const handleDelete = async (noteId) => {
     const confirmed = window.confirm('Delete this note? This can’t be undone.');
