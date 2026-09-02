@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import DashboardHeader from '../components/notes/DashboardHeader';
 import SearchBar from '../components/notes/SearchBar';
 import NoteList from '../components/notes/NoteList';
@@ -6,7 +6,7 @@ import EmptyNotesState from '../components/notes/EmptyNotesState';
 import NotesToolbar from '../components/notes/NotesToolbar';
 import ImportSummaryBanner from '../components/notes/ImportSummaryBanner';
 import { getNotesRequest, createNoteRequest, deleteNoteRequest } from '../api/notesApi';
-import { downloadExportFile, parseImportFiles } from '../utils/notesTransfer';
+import { downloadNotesAsTxtFiles, parseImportFiles } from '../utils/notesTransfer';
 import { useDebounce } from '../hooks/useDebounce';
 import { getSocket } from '../socket/socketClient';
 import './DashboardPage.css';
@@ -17,39 +17,26 @@ const DashboardPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 400);
-  const fetchGeneration = useRef(0);
 
-  const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [importSummary, setImportSummary] = useState(null);
 
-const fetchNotes = useCallback(async (search) => {
-  const generation = ++fetchGeneration.current;
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
 
-  setStatus('loading');
-  setErrorMessage('');
-
-  try {
-    const res = await getNotesRequest(search);
-
-    if (generation !== fetchGeneration.current) {
-      return;
+  const fetchNotes = useCallback(async (search) => {
+    setStatus('loading');
+    setErrorMessage('');
+    try {
+      const res = await getNotesRequest(search);
+      setNotes(res.data.data);
+      setStatus('success');
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'Could not load your notes. Please try again.');
+      setStatus('error');
     }
-
-    setNotes(res.data.data);
-    setStatus('success');
-  } catch (error) {
-    if (generation !== fetchGeneration.current) {
-      return;
-    }
-
-    setErrorMessage(
-      error.response?.data?.message ||
-        'Could not load your notes. Please try again.'
-    );
-    setStatus('error');
-  }
-}, []);
+  }, []);
 
   useEffect(() => {
     fetchNotes(debouncedSearchTerm);
@@ -72,39 +59,64 @@ const fetchNotes = useCallback(async (search) => {
       socket.off('note:updated', handleRemoteChange);
       socket.off('note:deleted', handleRemoteChange);
     };
-  }, [debouncedSearchTerm, fetchNotes]);  
+  }, [debouncedSearchTerm, fetchNotes]);
 
   const handleDelete = async (noteId) => {
     const confirmed = window.confirm('Delete this note? This can’t be undone.');
     if (!confirmed) return;
 
+    const previousNotes = notes;
     setNotes((current) => current.filter((note) => note._id !== noteId));
 
     try {
       await deleteNoteRequest(noteId);
     } catch (error) {
-      await fetchNotes(debouncedSearchTerm);
-
-      alert(
-        error.response?.data?.message ||
-          'Could not delete the note. Please try again.'
-      );
+      setNotes(previousNotes);
+      alert(error.response?.data?.message || 'Could not delete the note. Please try again.');
     }
   };
 
-  const handleExport = async () => {
+  const handleEnterSelectMode = () => {
+    setIsSelectMode(true);
+    setSelectedIds(new Set());
+  };
+
+  const handleCancelSelect = () => {
+    setIsSelectMode(false);
+    setSelectedIds(new Set());
+  };
+
+  const handleToggleSelect = (noteId) => {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(noteId)) {
+        next.delete(noteId);
+      } else {
+        next.add(noteId);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    setSelectedIds(new Set(notes.map((note) => note._id)));
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedIds(new Set());
+  };
+
+  const handleExportSelected = async () => {
+    const selectedNotes = notes.filter((note) => selectedIds.has(note._id));
+    if (selectedNotes.length === 0) return;
+
     setIsExporting(true);
     try {
-      const res = await getNotesRequest();
-      if (res.data.data.length === 0) {
-        alert('You have no notes to export yet.');
-        return;
-      }
-      downloadExportFile(res.data.data);
-    } catch (error) {
-      alert(error.response?.data?.message || 'Could not export your notes. Please try again.');
+      await downloadNotesAsTxtFiles(selectedNotes);
     } finally {
       setIsExporting(false);
+      setIsSelectMode(false);
+      setSelectedIds(new Set());
     }
   };
 
@@ -153,7 +165,14 @@ const fetchNotes = useCallback(async (search) => {
         <h1 className="dashboard-content__title">My Notes</h1>
 
         <NotesToolbar
-          onExport={handleExport}
+          isSelectMode={isSelectMode}
+          selectedCount={selectedIds.size}
+          totalCount={notes.length}
+          onEnterSelectMode={handleEnterSelectMode}
+          onCancelSelect={handleCancelSelect}
+          onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
+          onExportSelected={handleExportSelected}
           onImportFiles={handleImportFiles}
           isExporting={isExporting}
           isImporting={isImporting}
@@ -161,7 +180,7 @@ const fetchNotes = useCallback(async (search) => {
 
         <ImportSummaryBanner summary={importSummary} onDismiss={() => setImportSummary(null)} />
 
-        <SearchBar value={searchTerm} onChange={setSearchTerm} />
+        {!isSelectMode && <SearchBar value={searchTerm} onChange={setSearchTerm} />}
 
         {status === 'loading' && <p className="dashboard-state">Loading your notes…</p>}
 
@@ -177,7 +196,13 @@ const fetchNotes = useCallback(async (search) => {
         )}
 
         {status === 'success' && notes.length > 0 && (
-          <NoteList notes={notes} onDelete={handleDelete} />
+          <NoteList
+            notes={notes}
+            onDelete={handleDelete}
+            selectionMode={isSelectMode}
+            selectedIds={selectedIds}
+            onToggleSelect={handleToggleSelect}
+          />
         )}
       </main>
     </div>

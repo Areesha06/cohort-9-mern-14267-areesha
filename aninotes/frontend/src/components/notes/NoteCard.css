@@ -121,3 +121,22 @@
   border-left: 3px solid var(--color-border);
   color: var(--color-text-muted);
 }
+
+.note-card--selectable {
+  cursor: pointer;
+}
+
+.note-card--selectable.is-selected {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.note-card__checkbox {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}

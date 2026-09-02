@@ -1,73 +1,69 @@
-import { buildExportFile, parseImportFiles } from './notesTransfer';
+import { buildNoteTxt, parseImportFiles } from './notesTransfer';
 
-const makeJsonFile = (name, content) => new File([JSON.stringify(content)], name, { type: 'application/json' });
+const makeTxtFile = (name, text) => new File([text], name, { type: 'text/plain' });
 
-describe('buildExportFile', () => {
-  it('wraps notes in an export envelope with app name and version', () => {
-    const notes = [{ title: 'A', content: '<p>a</p>', createdAt: '2026-01-01', updatedAt: '2026-01-02' }];
-    const json = JSON.parse(buildExportFile(notes));
+describe('buildNoteTxt', () => {
+  it('starts with the title, then a blank line, then the plain-text content', () => {
+    const note = { title: 'Grocery List', content: '<p>Milk</p><p>Eggs</p>' };
+    const text = buildNoteTxt(note);
+    const lines = text.split('\n');
 
-    expect(json.app).toBe('AniNotes');
-    expect(json.notes).toHaveLength(1);
-    expect(json.notes[0].title).toBe('A');
+    expect(lines[0]).toBe('Grocery List');
+    expect(lines[1]).toBe('');
+    expect(text).toContain('Milk');
+    expect(text).toContain('Eggs');
+  });
+
+  it('converts bullet list items into "- " prefixed lines', () => {
+    const note = { title: 'Todo', content: '<ul><li>First</li><li>Second</li></ul>' };
+    const text = buildNoteTxt(note);
+
+    expect(text).toContain('- First');
+    expect(text).toContain('- Second');
   });
 });
 
 describe('parseImportFiles', () => {
-  it('parses a single AniNotes export file containing multiple notes', async () => {
-    const file = makeJsonFile('export.json', {
-      app: 'AniNotes',
-      notes: [{ title: 'First', content: '<p>one</p>' }, { title: 'Second', content: '<p>two</p>' }],
-    });
-
+  it('uses the first line as the title and the rest as content', async () => {
+    const file = makeTxtFile('note.txt', 'My Title\n\nSome content here.');
     const { validNotes, errors } = await parseImportFiles([file]);
 
-    expect(validNotes).toHaveLength(2);
     expect(errors).toHaveLength(0);
+    expect(validNotes[0].title).toBe('My Title');
+    expect(validNotes[0].content).toContain('Some content here.');
   });
 
-  it('parses a plain array of notes', async () => {
-    const file = makeJsonFile('notes.json', [{ title: 'X', content: '<p>y</p>' }]);
+  it('falls back to the filename as the title for a single-line file', async () => {
+    const file = makeTxtFile('Quick-Reminder.txt', 'Buy milk on the way home.');
     const { validNotes } = await parseImportFiles([file]);
-    expect(validNotes).toHaveLength(1);
+
+    expect(validNotes[0].title).toBe('Quick Reminder');
+    expect(validNotes[0].content).toContain('Buy milk on the way home.');
   });
 
-  it('parses a single note object not wrapped in an array', async () => {
-    const file = makeJsonFile('single.json', { title: 'Solo', content: '<p>note</p>' });
-    const { validNotes } = await parseImportFiles([file]);
-    expect(validNotes).toHaveLength(1);
-    expect(validNotes[0].title).toBe('Solo');
-  });
-
-  it('combines valid notes from multiple files into one list', async () => {
-    const fileA = makeJsonFile('a.json', [{ title: 'A1', content: '<p>a1</p>' }]);
-    const fileB = makeJsonFile('b.json', [{ title: 'B1', content: '<p>b1</p>' }]);
+  it('imports multiple selected .txt files as separate notes', async () => {
+    const fileA = makeTxtFile('a.txt', 'Note A\n\nContent A');
+    const fileB = makeTxtFile('b.txt', 'Note B\n\nContent B');
 
     const { validNotes } = await parseImportFiles([fileA, fileB]);
+
     expect(validNotes).toHaveLength(2);
+    expect(validNotes.map((n) => n.title)).toEqual(['Note A', 'Note B']);
   });
 
-  it('reports an error for invalid JSON without failing the whole batch', async () => {
-    const badFile = new File(['not json'], 'bad.json', { type: 'application/json' });
-    const goodFile = makeJsonFile('good.json', [{ title: 'Good', content: '<p>g</p>' }]);
-
-    const { validNotes, errors } = await parseImportFiles([badFile, goodFile]);
-
-    expect(validNotes).toHaveLength(1);
-    expect(errors).toHaveLength(1);
-    expect(errors[0].file).toBe('bad.json');
-  });
-
-  it('skips individual notes missing a title or content', async () => {
-    const file = makeJsonFile('mixed.json', [
-      { title: 'Has both', content: '<p>ok</p>' },
-      { title: '', content: '<p>no title</p>' },
-      { title: 'No content', content: '' },
-    ]);
-
+  it('reports an error for a completely empty file', async () => {
+    const file = makeTxtFile('empty.txt', '   ');
     const { validNotes, errors } = await parseImportFiles([file]);
 
-    expect(validNotes).toHaveLength(1);
-    expect(errors).toHaveLength(2);
+    expect(validNotes).toHaveLength(0);
+    expect(errors[0].file).toBe('empty.txt');
+  });
+
+  it('escapes HTML-like characters found in imported plain text', async () => {
+    const file = makeTxtFile('note.txt', 'Title\n\n<script>alert(1)</script>');
+    const { validNotes } = await parseImportFiles([file]);
+
+    expect(validNotes[0].content).not.toContain('<script>');
+    expect(validNotes[0].content).toContain('&lt;script&gt;');
   });
 });
