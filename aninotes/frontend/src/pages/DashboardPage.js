@@ -5,13 +5,17 @@ import NoteList from '../components/notes/NoteList';
 import EmptyNotesState from '../components/notes/EmptyNotesState';
 import NotesToolbar from '../components/notes/NotesToolbar';
 import ImportSummaryBanner from '../components/notes/ImportSummaryBanner';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import { getNotesRequest, createNoteRequest, deleteNoteRequest } from '../api/notesApi';
 import { downloadNotesAsTxtFiles, parseImportFiles } from '../utils/notesTransfer';
 import { useDebounce } from '../hooks/useDebounce';
+import { useToast } from '../context/ToastContext';
 import { getSocket } from '../socket/socketClient';
 import './DashboardPage.css';
 
 const DashboardPage = () => {
+  const { showToast } = useToast();
+
   const [notes, setNotes] = useState([]);
   const [status, setStatus] = useState('loading');
   const [errorMessage, setErrorMessage] = useState('');
@@ -24,6 +28,8 @@ const DashboardPage = () => {
 
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
+
+  const [noteToDelete, setNoteToDelete] = useState(null);
 
   const fetchNotes = useCallback(async (search) => {
     setStatus('loading');
@@ -61,9 +67,17 @@ const DashboardPage = () => {
     };
   }, [debouncedSearchTerm, fetchNotes]);
 
-  const handleDelete = async (noteId) => {
-    const confirmed = window.confirm('Delete this note? This can’t be undone.');
-    if (!confirmed) return;
+  const handleDeleteRequest = (noteId) => {
+    setNoteToDelete(noteId);
+  };
+
+  const handleCancelDelete = () => {
+    setNoteToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    const noteId = noteToDelete;
+    setNoteToDelete(null);
 
     const previousNotes = notes;
     setNotes((current) => current.filter((note) => note._id !== noteId));
@@ -72,7 +86,7 @@ const DashboardPage = () => {
       await deleteNoteRequest(noteId);
     } catch (error) {
       setNotes(previousNotes);
-      alert(error.response?.data?.message || 'Could not delete the note. Please try again.');
+      showToast(error.response?.data?.message || 'Could not delete the note. Please try again.', 'error');
     }
   };
 
@@ -198,13 +212,24 @@ const DashboardPage = () => {
         {status === 'success' && notes.length > 0 && (
           <NoteList
             notes={notes}
-            onDelete={handleDelete}
+            onDelete={handleDeleteRequest}
             selectionMode={isSelectMode}
             selectedIds={selectedIds}
             onToggleSelect={handleToggleSelect}
           />
         )}
       </main>
+
+      <ConfirmDialog
+        isOpen={Boolean(noteToDelete)}
+        title="Delete this note?"
+        message="This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        danger
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 };
