@@ -1,3 +1,4 @@
+process.env.REACT_APP_SOCKET_URL = 'http://localhost:5000';
 jest.mock('socket.io-client');
 
 import { io } from 'socket.io-client';

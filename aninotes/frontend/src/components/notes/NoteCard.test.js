@@ -62,4 +62,26 @@ describe('NoteCard', () => {
 
     expect(onDelete).toHaveBeenCalledWith('note1');
   });
+
+  it('shows a checkbox and calls onToggleSelect when in selection mode', async () => {
+    const onToggleSelect = jest.fn();
+    render(
+      <MemoryRouter>
+        <NoteCard note={sampleNote} onDelete={jest.fn()} selectionMode isSelected={false} onToggleSelect={onToggleSelect} />
+      </MemoryRouter>
+    );
+
+    await userEvent.click(screen.getByLabelText(/select note titled grocery list/i));
+    expect(onToggleSelect).toHaveBeenCalledWith('note1');
+  });
+
+  it('hides the delete button while in selection mode', () => {
+    render(
+      <MemoryRouter>
+        <NoteCard note={sampleNote} onDelete={jest.fn()} selectionMode isSelected={false} onToggleSelect={jest.fn()} />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByRole('button', { name: /delete note/i })).not.toBeInTheDocument();
+  });
 });

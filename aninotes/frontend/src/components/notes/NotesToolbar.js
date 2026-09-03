@@ -1,7 +1,19 @@
 import { useRef } from 'react';
 import './NotesToolbar.css';
 
-const NotesToolbar = ({ onExport, onImportFiles, isExporting, isImporting }) => {
+const NotesToolbar = ({
+  isSelectMode,
+  selectedCount,
+  totalCount,
+  onEnterSelectMode,
+  onCancelSelect,
+  onSelectAll,
+  onDeselectAll,
+  onExportSelected,
+  onImportFiles,
+  isExporting,
+  isImporting,
+}) => {
   const fileInputRef = useRef(null);
 
   const handleImportClick = () => {
@@ -16,20 +28,47 @@ const NotesToolbar = ({ onExport, onImportFiles, isExporting, isImporting }) => 
     e.target.value = '';
   };
 
+  const allSelected = selectedCount > 0 && selectedCount === totalCount;
+
   return (
     <div className="notes-toolbar">
-      <button type="button" className="notes-toolbar__btn" onClick={onExport} disabled={isExporting}>
-        {isExporting ? 'Exporting…' : '⬇ Export notes'}
-      </button>
+      {isSelectMode ? (
+        <>
+          <span className="notes-toolbar__count">{selectedCount} selected</span>
 
-      <button type="button" className="notes-toolbar__btn" onClick={handleImportClick} disabled={isImporting}>
-        {isImporting ? 'Importing…' : '⬆ Import notes'}
-      </button>
+          <button type="button" className="notes-toolbar__btn" onClick={allSelected ? onDeselectAll : onSelectAll}>
+            {allSelected ? 'Deselect all' : 'Select all'}
+          </button>
+
+          <button
+            type="button"
+            className="notes-toolbar__btn notes-toolbar__btn--primary"
+            onClick={onExportSelected}
+            disabled={selectedCount === 0 || isExporting}
+          >
+            {isExporting ? 'Exporting…' : `⬇ Export selected (${selectedCount})`}
+          </button>
+
+          <button type="button" className="notes-toolbar__btn" onClick={onCancelSelect}>
+            Cancel
+          </button>
+        </>
+      ) : (
+        <>
+          <button type="button" className="notes-toolbar__btn" onClick={onEnterSelectMode} disabled={totalCount === 0}>
+            🗂 Export notes
+          </button>
+
+          <button type="button" className="notes-toolbar__btn" onClick={handleImportClick} disabled={isImporting}>
+            {isImporting ? 'Importing…' : '⬆ Import notes'}
+          </button>
+        </>
+      )}
 
       <input
         ref={fileInputRef}
         type="file"
-        accept="application/json,.json"
+        accept="text/plain,.txt"
         multiple
         onChange={handleFileChange}
         className="notes-toolbar__file-input"

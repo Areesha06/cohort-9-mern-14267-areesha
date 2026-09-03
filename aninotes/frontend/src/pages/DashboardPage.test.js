@@ -40,13 +40,17 @@ const mockSocket = {
   disconnect: jest.fn(),
 };
 
+import { ToastProvider } from '../context/ToastContext';
+
 const renderDashboard = () => {
   localStorage.setItem('aninotes_token', 'fake-token');
   getMeRequest.mockResolvedValue({ data: { data: { username: 'johndoe' } } });
 
   return render(
     <MemoryRouter initialEntries={['/dashboard']} future={routerFuture}>
-      <AuthProvider><DashboardPage /></AuthProvider>
+      <ToastProvider>
+        <AuthProvider><DashboardPage /></AuthProvider>
+      </ToastProvider>
     </MemoryRouter>
   );
 };
@@ -91,31 +95,51 @@ describe('DashboardPage', () => {
     expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
   });
 
-  it('removes a note from the list after a successful delete', async () => {
+  it('shows the confirm dialog and removes the note after confirming', async () => {
     getNotesRequest.mockResolvedValue({ data: { data: sampleNotes } });
     deleteNoteRequest.mockResolvedValue({ data: { success: true } });
-    window.confirm = jest.fn(() => true);
 
     renderDashboard();
     await screen.findByText('First Note');
 
     await userEvent.click(screen.getAllByRole('button', { name: /delete note/i })[0]);
+
+    expect(await screen.findByText('Delete this note?')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /^delete$/i }));
 
     await waitFor(() => expect(deleteNoteRequest).toHaveBeenCalledWith('1'));
     await waitFor(() => expect(screen.queryByText('First Note')).not.toBeInTheDocument());
   });
 
-  it('does not delete the note if the user cancels the confirmation', async () => {
+  it('does not delete the note if the user cancels the confirm dialog', async () => {
     getNotesRequest.mockResolvedValue({ data: { data: sampleNotes } });
-    window.confirm = jest.fn(() => false);
 
     renderDashboard();
     await screen.findByText('First Note');
 
     await userEvent.click(screen.getAllByRole('button', { name: /delete note/i })[0]);
+    await screen.findByText('Delete this note?');
+
+    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
 
     expect(deleteNoteRequest).not.toHaveBeenCalled();
     expect(screen.getByText('First Note')).toBeInTheDocument();
+  });
+
+  it('shows a toast when deleting fails', async () => {
+    getNotesRequest.mockResolvedValue({ data: { data: sampleNotes } });
+    deleteNoteRequest.mockRejectedValue({ response: { data: { message: 'Server error' } } });
+
+    renderDashboard();
+    await screen.findByText('First Note');
+
+    await userEvent.click(screen.getAllByRole('button', { name: /delete note/i })[0]);
+    await screen.findByText('Delete this note?');
+    await userEvent.click(screen.getByRole('button', { name: /^delete$/i }));
+
+    expect(await screen.findByText('Server error')).toBeInTheDocument();
+    expect(await screen.findByText('First Note')).toBeInTheDocument();
   });
 
   it('renders a search bar', async () => {
@@ -156,43 +180,41 @@ describe('DashboardPage', () => {
       global.URL.revokeObjectURL = jest.fn();
     });
 
-    it('fetches the full unfiltered note list and triggers a download when Export is clicked', async () => {
+    it('enters select mode and exports the checked note as a separate .txt file', async () => {
       getNotesRequest.mockResolvedValue({ data: { count: 2, data: sampleNotes } });
       renderDashboard();
       await screen.findByText('First Note');
 
       await userEvent.click(screen.getByRole('button', { name: /export notes/i }));
+      await userEvent.click(screen.getByLabelText(/select note titled first note/i));
+      await userEvent.click(screen.getByRole('button', { name: /export selected \(1\)/i }));
 
-      await waitFor(() => expect(getNotesRequest).toHaveBeenLastCalledWith());
-      expect(global.URL.createObjectURL).toHaveBeenCalled();
+      await waitFor(() => expect(global.URL.createObjectURL).toHaveBeenCalledTimes(1));
     });
 
-    it('imports a note from a selected file and shows a success summary', async () => {
+    it('imports multiple .txt files as separate notes', async () => {
       getNotesRequest.mockResolvedValue({ data: { count: 2, data: sampleNotes } });
       createNoteRequest.mockResolvedValue({ data: { data: { _id: 'new1' } } });
 
       renderDashboard();
       await screen.findByText('First Note');
 
-      const file = new File(
-        [JSON.stringify([{ title: 'Imported Note', content: '<p>Hi</p>' }])],
-        'import.json',
-        { type: 'application/json' }
-      );
+      const fileA = new File(['Imported A\n\nHello there'], 'a.txt', { type: 'text/plain' });
+      const fileB = new File(['Imported B\n\nHi again'], 'b.txt', { type: 'text/plain' });
 
-      await userEvent.upload(screen.getByLabelText(/import note files/i), file);
+      await userEvent.upload(screen.getByLabelText(/import note files/i), [fileA, fileB]);
 
-      expect(await screen.findByText(/1 note imported successfully/i)).toBeInTheDocument();
-      expect(createNoteRequest).toHaveBeenCalledWith({ title: 'Imported Note', content: '<p>Hi</p>' });
+      expect(await screen.findByText(/2 notes imported successfully/i)).toBeInTheDocument();
+      expect(createNoteRequest).toHaveBeenCalledTimes(2);
     });
 
-    it('shows an error summary when an imported file has invalid JSON', async () => {
+    it('shows an error summary for an empty imported file', async () => {
       getNotesRequest.mockResolvedValue({ data: { count: 2, data: sampleNotes } });
       renderDashboard();
       await screen.findByText('First Note');
 
-      const badFile = new File(['not json'], 'broken.json', { type: 'application/json' });
-      await userEvent.upload(screen.getByLabelText(/import note files/i), badFile);
+      const emptyFile = new File(['   '], 'empty.txt', { type: 'text/plain' });
+      await userEvent.upload(screen.getByLabelText(/import note files/i), emptyFile);
 
       expect(await screen.findByText(/could not be imported/i)).toBeInTheDocument();
     });
